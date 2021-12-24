@@ -5,6 +5,7 @@ from pygame import Rect, Surface
 def hflip(image: Surface) -> Surface:
     return pygame.transform.flip(image, True, False)
 
+
 def hflips(images: list[Surface]) -> list[Surface]:
     return list(map(hflip, images))
 
@@ -74,10 +75,10 @@ class ImageStore:
             load_animation("Main/Player/Player-Idle-24x24.png", 72, 3),
             load_animation("Main/Player/Player-Run-24x24.png", 72, 8),
             load_animation("Main/Player/Player-Jump-24x24.png", 72, 4),
-            load_animation("Main/Player/Player-Attack-24x24.png", 72, 5)
+            load_animation("Main/Player/Player-Attack-24x24.png", 72, 5),
         ]
 
-        keys = '0123456789abcdefghijklmnopqrstuvwxyz'
+        keys = "0123456789abcdefghijklmnopqrstuvwxyz"
         store.tiles = {}
         for i in range(1, len(keys)):
             tile_image = fast_load_alpha(f"Main/Tiles/Tile-{str(i).zfill(2)}.png")
@@ -87,7 +88,9 @@ class ImageStore:
         store.arrow = arrow_image.subsurface(Rect(0, 0, 36, 36))
         store.arrow_left = hflip(store.arrow)
 
-        store.arrow_stuck = load_animation("Main\Objects\Obj-Arrow-Stuck-12x12.png", 36, 9)
+        store.arrow_stuck = load_animation(
+            "Main\Objects\Obj-Arrow-Stuck-12x12.png", 36, 9
+        )
 
         store.heart = heart
 

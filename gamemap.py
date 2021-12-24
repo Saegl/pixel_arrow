@@ -34,17 +34,18 @@ class Map(DrawMixin):
         for x in range(self.m):
             for y in range(self.n):
                 tile_type = self.cells[x][y]
-                if tile_type != '0':
+                if tile_type != "0":
                     screen.blit(
-                        self.image_store.tiles[tile_type], (x * self.tile_size, y * self.tile_size)
+                        self.image_store.tiles[tile_type],
+                        (x * self.tile_size, y * self.tile_size),
                     )
-    
+
     def grid_loc(self, point: Vector2D) -> Vector2D:
         return Vector2D(point.x // self.tile_size, point.y // self.tile_size)
-    
+
     def tile_type(self, pos: Vector2D) -> str:
         return self.cells[pos.x][pos.y]
-    
+
     def cell_to_rect(self, pos: Vector2D) -> Rect:
         x = pos.x
         y = pos.y

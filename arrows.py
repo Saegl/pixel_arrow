@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import pygame as pg
 from pygame import Rect, Surface
 from gamemap import Map, cell_to_rect
+
 # from player import Player
 
 from vector import Vector2D
@@ -11,6 +12,7 @@ from mixins import DrawMixin, UpdateMixin
 from enum import Enum
 
 ARROW_SPEED = 15.0
+
 
 class ArrowState(Enum):
     fly = 0
@@ -36,34 +38,34 @@ class Arrow:
         if self.left:
             return image_store.arrow_left
         return image_store.arrow
-    
+
     def damagebox(self) -> Rect:
         return Rect(self.pos.x, self.pos.y + 12, 36, 12)
-    
+
     def on_screen(self, screen: Surface):
-        screenbox = screen.get_rect() 
+        screenbox = screen.get_rect()
         arrowbox = self.damagebox()
         return not (arrowbox.right < screenbox.left or arrowbox.left > screenbox.right)
-    
+
     def collide(self, map_: Map) -> bool:
         damagebox = self.damagebox()
         arrow_head = damagebox.left if self.left else damagebox.right
         grid_loc: Vector2D = map_.grid_loc(Vector2D(arrow_head, damagebox.centery))
         tile_type = map_.tile_type(grid_loc)
-        if tile_type == '0':
+        if tile_type == "0":
             return False
         tile_rect = map_.cell_to_rect(grid_loc)
         return damagebox.colliderect(tile_rect)
-    
+
     def collide_x(self, dx: float, map_: Map):
         ans = self.collide(map_)
         return ans
-    
+
     def collide_player(self, player):
         damagebox = self.damagebox()
         playerbox = player.rect
         return damagebox.colliderect(playerbox)
-    
+
     def damage(self, player):
         player.get_damage(1)
         self.state = ArrowState.dissapear
@@ -78,7 +80,7 @@ class Arrows(DrawMixin, UpdateMixin):
 
     def launch_an_arrow(self, arrow: Arrow):
         self.arrows.append(arrow)
-    
+
     def update(self):
         player = self.game.player
         arrows_on_screen = []
@@ -96,8 +98,10 @@ class Arrows(DrawMixin, UpdateMixin):
             elif arrow.state == ArrowState.dissapear:
                 continue
             arrows_on_screen.append(arrow)
-        
-        arrows_on_screen = list(filter(lambda a: a.on_screen(self.screen), arrows_on_screen))
+
+        arrows_on_screen = list(
+            filter(lambda a: a.on_screen(self.screen), arrows_on_screen)
+        )
         self.arrows = arrows_on_screen
 
     def draw(self):

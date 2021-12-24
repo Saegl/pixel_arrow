@@ -10,6 +10,7 @@ from image_store import ImageStore
 from player import Player
 from gamemap import Map
 from vector import Vector2D
+from client import Client
 
 
 class Game:
@@ -19,11 +20,13 @@ class Game:
 
         self.clock = pygame.time.Clock()
         self.window_size = (800, 450)
-        self.framerate = 60
+        self.framerate = 30
         self.font = pygame.font.SysFont("Arial", 18)
-        self.fullscreen = True
+        self.fullscreen = False
         if self.fullscreen:
-            self.display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
+            self.display = pygame.display.set_mode(
+                (0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF
+            )
             # self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.SCALED)
         else:
             self.display = pygame.display.set_mode(self.window_size, 0, 32)
@@ -34,6 +37,8 @@ class Game:
         self.map = Map("map.txt", self.images, self.screen)
         self.player = Player(self.images, self.screen, self.map, self)
         self.arrows = Arrows(self.images, self.screen, self)
+
+        self.opponents = []
 
         self.event_handlers = {
             QUIT: self.on_quit,
@@ -51,8 +56,11 @@ class Game:
         screen.blit(self.images.background, (0, 0))
 
         self.map.draw()
-        self.player.draw()
         self.arrows.draw()
+
+        self.player.draw()
+        for opponent in self.opponents:
+            opponent.draw()
 
         screen.blit(self.update_fps(), (10, 0))
         screen.blit(
@@ -62,13 +70,38 @@ class Game:
         surf = pygame.transform.scale(screen, self.display.get_size())
         self.display.blit(surf, (0, 0))
 
-    def update(self, dt):
+    def update(self, dt, opponents):
         self.arrows.update()
         self.player.update()
 
+        for i, opponent_data in enumerate(opponents):
+            opponent = self.opponents[i]
+            (
+                opponent.attacking,
+                opponent.moving_right,
+                opponent.moving_left,
+                opponent.moving_down,
+                opponent.moving_down,
+            ) = opponent_data
+            opponent.update()
+            self.opponents.append(opponent)
+    
+    def create_opponents(self, opponents_data):
+        for opponent_data in opponents_data:
+            opponent = Player(self.images, self.screen, self.map, game)
+            (
+                opponent.attacking,
+                opponent.moving_right,
+                opponent.moving_left,
+                opponent.moving_down,
+                opponent.moving_down,
+            ) = opponent_data
+            opponent.update()
+            self.opponents.append(opponent)
+
     def on_keydown(self, event: Event):
         if event.key == K_a:
-            self.player.attack()
+            self.player.attacking = True
         if event.key == K_RIGHT:
             self.player.moving_right = True
         if event.key == K_LEFT:
@@ -96,8 +129,20 @@ class Game:
 
     def gameloop(self):
         dt = 0
+        client = Client()
+        opponents_data = client.send([False] * 5)
+        self.create_opponents(opponents_data)
         while True:
-            self.update(dt)
+            opponents_data = client.send(
+                [
+                    self.player.attacking,
+                    self.player.moving_right,
+                    self.player.moving_left,
+                    self.player.moving_down,
+                    self.player.moving_up,
+                ]
+            )
+            self.update(dt, opponents_data)
             self.draw()
 
             for event in pygame.event.get():

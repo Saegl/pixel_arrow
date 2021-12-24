@@ -12,6 +12,7 @@ from mixins import DrawMixin, UpdateMixin
 from arrows import Arrow, ArrowState
 from collisions import collide_with
 
+
 class PlayerState:
     idle = 0
     run = 1
@@ -20,7 +21,9 @@ class PlayerState:
 
 
 class Player(DrawMixin, UpdateMixin):
-    def __init__(self, image_store: ImageStore, screen: Surface, map_: Map, game) -> None:
+    def __init__(
+        self, image_store: ImageStore, screen: Surface, map_: Map, game
+    ) -> None:
         self.setup_draw(image_store, screen)
         self.setup_update(game)
 
@@ -89,7 +92,7 @@ class Player(DrawMixin, UpdateMixin):
                 self.state = PlayerState.idle
             else:
                 self.state = PlayerState.run
-        else: # In air
+        else:  # In air
             self.state = PlayerState.jump
 
         ## Side to look
@@ -97,21 +100,21 @@ class Player(DrawMixin, UpdateMixin):
             self.look_left = False
         elif self.moving_left:
             self.look_left = True
-    
+
     @property
     def state(self):
         return self._state
-    
+
     @state.setter
     def state(self, value: PlayerState):
         if self._state != value:
             self._state = value
             self.frames = 0
-    
+
     def get_damage(self, damage: int):
         self.hp -= damage
         self.y_momentum -= 3.5
-    
+
     def is_cycle_animation(self):
         return self.state not in (PlayerState.jump, PlayerState.attack)
 
@@ -129,7 +132,7 @@ class Player(DrawMixin, UpdateMixin):
             if self.state == PlayerState.attack and n == 3 and not self.arrow_fired:
                 self.launch_an_arrow()
                 self.arrow_fired = True
-            
+
             if n >= len(images):
                 if self.state == PlayerState.attack:
                     self.attacking = False
@@ -164,7 +167,7 @@ class Player(DrawMixin, UpdateMixin):
             Vector2D(loc.x + 1, loc.y),  # right
             Vector2D(loc.x - 1, loc.y),  # left
         ]
-        collisions = filter(lambda loc: map_.cells[loc.x][loc.y] != '0', tiles_loc)
+        collisions = filter(lambda loc: map_.cells[loc.x][loc.y] != "0", tiles_loc)
         collisions = map(
             lambda loc: cell_to_rect(loc.x, loc.y, self.tile_size), collisions
         )
@@ -182,16 +185,15 @@ class Player(DrawMixin, UpdateMixin):
         ans = self.collide()
         self.location.x -= dx
         return ans
-    
+
     def on_ground(self) -> bool:
         return self.collide_y(0.1)
-    
+
     def moving(self) -> bool:
-        return any([self.moving_right, self.moving_left, self.moving_up, self.moving_down])
-    
-    def attack(self):
-        self.attacking = True
-    
+        return any(
+            [self.moving_right, self.moving_left, self.moving_up, self.moving_down]
+        )
+
     def launch_an_arrow(self):
         rect = self.rect
 
@@ -199,7 +201,7 @@ class Player(DrawMixin, UpdateMixin):
             x = rect.left - 36
         else:
             x = rect.right
-        
+
         pos = Vector2D(x, rect.centery)
         arrow = Arrow(pos, self.look_left, ArrowState.fly)
         self.game.arrows.launch_an_arrow(arrow)
