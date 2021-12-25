@@ -22,7 +22,7 @@ class PlayerState:
 
 class Player(DrawMixin, UpdateMixin):
     def __init__(
-        self, image_store: ImageStore, screen: Surface, map_: Map, game
+        self, location: Vector2D, show_hp: bool, image_store: ImageStore, screen: Surface, map_: Map, game
     ) -> None:
         self.setup_draw(image_store, screen)
         self.setup_update(game)
@@ -39,25 +39,29 @@ class Player(DrawMixin, UpdateMixin):
         self.look_left = False
 
         self.hp = 5
+        self.show_hp = show_hp
 
         self.tile_size = 48
         self._state = PlayerState.idle
         self.frames = 0
 
-        self.location = Vector2D(50.0, 500.0)
+        self.location = location
         self.y_momentum = 0
         self.acceleration = Vector2D(0.0, 0.0)
+        self.visible = True
 
         self.width = 72
         self.height = 72
 
     def draw(self):
         screen: Surface = self.screen
-        screen.blit(self.image, self.location.xy, (0, 0, 72, 72))
+        if self.visible:
+            screen.blit(self.image, self.location.xy, (0, 0, 72, 72))
 
-        offset = 33
-        for i in range(self.hp):
-            screen.blit(self.image_store.heart, (33.0 + offset * i, 10.0))
+        if self.show_hp:
+            offset = 33
+            for i in range(self.hp):
+                screen.blit(self.image_store.heart, (33.0 + offset * i, 10.0))
 
     def update(self):
         self.frames += 1
@@ -114,6 +118,8 @@ class Player(DrawMixin, UpdateMixin):
     def get_damage(self, damage: int):
         self.hp -= damage
         self.y_momentum -= 3.5
+        if self.hp < 0:
+            self.visible = False
 
     def is_cycle_animation(self):
         return self.state not in (PlayerState.jump, PlayerState.attack)

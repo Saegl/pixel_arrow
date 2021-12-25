@@ -30,8 +30,8 @@ class Server:
             try:
                 data = pickle.loads(conn.recv(64))
                 # print(data)
-                with self.players_data_lock:
-                    self.players_data[client_id] = data
+                # with self.players_data_lock:
+                self.players_data[client_id] = data
 
                 barrier.wait()
                 opponents_data = (

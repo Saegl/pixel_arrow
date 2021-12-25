@@ -62,7 +62,7 @@ class ImageStore:
         background_image = fast_load("Main/Backgrounds/merged-full-background.png")
         background_image = pygame.transform.scale(background_image, screen_size)
 
-        arrow_image = fast_load_alpha("Main\Objects\Obj-Arrow-Idle-12x12.png")
+        arrow_image = fast_load_alpha("Main/Objects/Obj-Arrow-Idle-12x12.png")
         arrow_image = scale_nx(arrow_image, 3)
 
         heart = fast_load_alpha("Main/UI/UI-Lives.png")
@@ -89,7 +89,7 @@ class ImageStore:
         store.arrow_left = hflip(store.arrow)
 
         store.arrow_stuck = load_animation(
-            "Main\Objects\Obj-Arrow-Stuck-12x12.png", 36, 9
+            "Main/Objects/Obj-Arrow-Stuck-12x12.png", 36, 9
         )
 
         store.heart = heart

@@ -10,7 +10,7 @@ from image_store import ImageStore
 from player import Player
 from gamemap import Map
 from vector import Vector2D
-from client import Client
+from udpclient import Client
 
 
 class Game:
@@ -20,7 +20,7 @@ class Game:
 
         self.clock = pygame.time.Clock()
         self.window_size = (800, 450)
-        self.framerate = 30
+        self.framerate = 60
         self.font = pygame.font.SysFont("Arial", 18)
         self.fullscreen = False
         if self.fullscreen:
@@ -35,10 +35,11 @@ class Game:
         self.images = ImageStore.load_images(self.screen.get_size())
 
         self.map = Map("map.txt", self.images, self.screen)
-        self.player = Player(self.images, self.screen, self.map, self)
+        self.player = Player(Vector2D(50.0, 500.0), True, self.images, self.screen, self.map, self)
         self.arrows = Arrows(self.images, self.screen, self)
 
         self.opponents = []
+        self.everyone_invisible = False
 
         self.event_handlers = {
             QUIT: self.on_quit,
@@ -74,6 +75,7 @@ class Game:
         self.arrows.update()
         self.player.update()
 
+        self.everyone_invisible = True
         for i, opponent_data in enumerate(opponents):
             opponent = self.opponents[i]
             (
@@ -81,21 +83,16 @@ class Game:
                 opponent.moving_right,
                 opponent.moving_left,
                 opponent.moving_down,
-                opponent.moving_down,
+                opponent.moving_up,
             ) = opponent_data
             opponent.update()
-            self.opponents.append(opponent)
-    
-    def create_opponents(self, opponents_data):
-        for opponent_data in opponents_data:
-            opponent = Player(self.images, self.screen, self.map, game)
-            (
-                opponent.attacking,
-                opponent.moving_right,
-                opponent.moving_left,
-                opponent.moving_down,
-                opponent.moving_down,
-            ) = opponent_data
+            if opponent.visible: self.everyone_invisible = False
+        self.everyone_invisible = self.everyone_invisible and self.player.visible
+
+    def create_opponents(self, opponents_spawn):
+        for opponent_spawn in opponents_spawn:
+            pos = Vector2D(opponent_spawn[0], opponent_spawn[1])
+            opponent = Player(pos, False, self.images, self.screen, self.map, game)
             opponent.update()
             self.opponents.append(opponent)
 
@@ -130,8 +127,12 @@ class Game:
     def gameloop(self):
         dt = 0
         client = Client()
-        opponents_data = client.send([False] * 5)
-        self.create_opponents(opponents_data)
+        spawners = client.wait_for_players()
+        my_spawn = spawners[client.cliend_id]
+        self.player.location = Vector2D(my_spawn[0], my_spawn[1])
+        opponents_spawn = spawners[:client.cliend_id] + spawners[client.cliend_id + 1:]
+        self.create_opponents(opponents_spawn)
+        
         while True:
             opponents_data = client.send(
                 [
@@ -142,7 +143,22 @@ class Game:
                     self.player.moving_up,
                 ]
             )
-            self.update(dt, opponents_data)
+            if len(opponents_data[0]) == 2:
+                print("New game started")
+                self.player.hp = 5
+                self.player.visible = True
+                self.arrows.arrows = []
+                spawners = opponents_data
+                my_spawn = spawners[client.cliend_id]
+                self.player.location = Vector2D(my_spawn[0], my_spawn[1])
+                opponents_spawn = spawners[:client.cliend_id] + spawners[client.cliend_id + 1:]
+                for i, opponent in enumerate(self.opponents):
+                    loc = opponents_spawn[i]
+                    opponent.location = Vector2D(loc[0], loc[1])
+                    opponent.visible = True
+                    opponent.hp = 5
+            else:
+                self.update(dt, opponents_data)
             self.draw()
 
             for event in pygame.event.get():
@@ -150,9 +166,16 @@ class Game:
                 if handler:
                     handler(event)
 
-            dt = self.clock.tick_busy_loop(self.framerate)
             pygame.display.update()
+            # dt = self.clock.tick_busy_loop(self.framerate)
+            if self.everyone_invisible:
+                client.winner()
+            dt = self.clock.tick(self.framerate)
 
+
+def main():
+    game = Game()
+    game.gameloop()
 
 if __name__ == "__main__":
     game = Game()
