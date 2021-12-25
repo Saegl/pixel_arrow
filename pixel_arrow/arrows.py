@@ -1,15 +1,13 @@
 from dataclasses import dataclass
-
-import pygame as pg
-from pygame import Rect, Surface
-from gamemap import Map, cell_to_rect
-
-# from player import Player
-
-from vector import Vector2D
-from mixins import DrawMixin, UpdateMixin
-
 from enum import Enum
+
+from pygame import Rect, Surface
+
+
+from pixel_arrow.gamemap import Map
+from pixel_arrow.vector import Vector2D
+from pixel_arrow.mixins import DrawMixin, UpdateMixin
+
 
 ARROW_SPEED = 15.0
 

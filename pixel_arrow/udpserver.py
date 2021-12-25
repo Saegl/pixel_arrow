@@ -7,7 +7,7 @@ server = "0.0.0.0"
 port = 5555
 buffer_size = 38
 
-number_of_players = 3
+number_of_players = 1
 players_data = [[False] * 5 for _ in range(number_of_players)]
 players_addresses = []
 spawn_places = [(50, 500), (1400, 50), (100, 50)]

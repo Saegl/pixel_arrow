@@ -1,8 +1,8 @@
 import pygame
 from pygame.rect import Rect
 
-from mixins import DrawMixin
-from vector import Vector2D
+from pixel_arrow.mixins import DrawMixin
+from pixel_arrow.vector import Vector2D
 
 
 def cell_to_rect(x, y, tile_size):

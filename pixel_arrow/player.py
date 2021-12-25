@@ -2,15 +2,13 @@ from dataclasses import dataclass
 
 import pygame
 from pygame import Surface
-from pygame import Rect
-from pygame import image
 
-from image_store import ImageStore
-from vector import Vector2D
-from gamemap import Map, cell_to_rect
-from mixins import DrawMixin, UpdateMixin
-from arrows import Arrow, ArrowState
-from collisions import collide_with
+from pixel_arrow.image_store import ImageStore
+from pixel_arrow.vector import Vector2D
+from pixel_arrow.gamemap import Map, cell_to_rect
+from pixel_arrow.mixins import DrawMixin, UpdateMixin
+from pixel_arrow.arrows import Arrow, ArrowState
+from pixel_arrow.collisions import collide_with
 
 
 class PlayerState:

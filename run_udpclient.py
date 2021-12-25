@@ -1,7 +1,6 @@
-from udpclient import *
+from pixel_arrow import udpclient
 
-
-client = Client()
+client = udpclient.Client()
 print(client.cliend_id)
 spawners = client.wait_for_players()
 my_spawn = spawners[client.cliend_id]
@@ -20,3 +19,6 @@ while True:
     from time import sleep
 
     sleep(3)
+    i += 1
+    if i % 3 == 0:
+        client.winner()

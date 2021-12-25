@@ -59,29 +59,29 @@ class ImageStore:
 
     @staticmethod
     def load_images(screen_size):
-        background_image = fast_load("Main/Backgrounds/merged-full-background.png")
+        background_image = fast_load("images/Backgrounds/merged-full-background.png")
         background_image = pygame.transform.scale(background_image, screen_size)
 
-        arrow_image = fast_load_alpha("Main/Objects/Obj-Arrow-Idle-12x12.png")
+        arrow_image = fast_load_alpha("images/Objects/Obj-Arrow-Idle-12x12.png")
         arrow_image = scale_nx(arrow_image, 3)
 
-        heart = fast_load_alpha("Main/UI/UI-Lives.png")
+        heart = fast_load_alpha("images/UI/UI-Lives.png")
         heart = scale_nx(heart, 3)
 
         store = ImageStore()
         store.background = background_image
 
         store.animations = [
-            load_animation("Main/Player/Player-Idle-24x24.png", 72, 3),
-            load_animation("Main/Player/Player-Run-24x24.png", 72, 8),
-            load_animation("Main/Player/Player-Jump-24x24.png", 72, 4),
-            load_animation("Main/Player/Player-Attack-24x24.png", 72, 5),
+            load_animation("images/Player/Player-Idle-24x24.png", 72, 3),
+            load_animation("images/Player/Player-Run-24x24.png", 72, 8),
+            load_animation("images/Player/Player-Jump-24x24.png", 72, 4),
+            load_animation("images/Player/Player-Attack-24x24.png", 72, 5),
         ]
 
         keys = "0123456789abcdefghijklmnopqrstuvwxyz"
         store.tiles = {}
         for i in range(1, len(keys)):
-            tile_image = fast_load_alpha(f"Main/Tiles/Tile-{str(i).zfill(2)}.png")
+            tile_image = fast_load_alpha(f"images/Tiles/Tile-{str(i).zfill(2)}.png")
             tile_image = scale_nx(tile_image, 2)
             store.tiles[keys[i]] = tile_image
 
@@ -89,7 +89,7 @@ class ImageStore:
         store.arrow_left = hflip(store.arrow)
 
         store.arrow_stuck = load_animation(
-            "Main/Objects/Obj-Arrow-Stuck-12x12.png", 36, 9
+            "images/Objects/Obj-Arrow-Stuck-12x12.png", 36, 9
         )
 
         store.heart = heart

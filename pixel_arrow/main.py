@@ -4,13 +4,13 @@ from pygame.event import Event
 
 from pygame.locals import *
 from pygame.surface import Surface
-from arrows import Arrows
 
-from image_store import ImageStore
-from player import Player
-from gamemap import Map
-from vector import Vector2D
-from udpclient import Client
+from pixel_arrow.arrows import Arrows
+from pixel_arrow.image_store import ImageStore
+from pixel_arrow.player import Player
+from pixel_arrow.gamemap import Map
+from pixel_arrow.vector import Vector2D
+from pixel_arrow.udpclient import Client
 
 
 class Game:
@@ -87,7 +87,7 @@ class Game:
             ) = opponent_data
             opponent.update()
             if opponent.visible: self.everyone_invisible = False
-        self.everyone_invisible = self.everyone_invisible and self.player.visible
+        self.everyone_invisible = self.everyone_invisible and len(self.opponents) != 0 and self.player.visible
 
     def create_opponents(self, opponents_spawn):
         for opponent_spawn in opponents_spawn:
@@ -143,7 +143,7 @@ class Game:
                     self.player.moving_up,
                 ]
             )
-            if len(opponents_data[0]) == 2:
+            if not len(opponents_data) == 0 and len(opponents_data[0]) == 2:
                 print("New game started")
                 self.player.hp = 5
                 self.player.visible = True
@@ -167,10 +167,10 @@ class Game:
                     handler(event)
 
             pygame.display.update()
-            # dt = self.clock.tick_busy_loop(self.framerate)
             if self.everyone_invisible:
                 client.winner()
-            dt = self.clock.tick(self.framerate)
+            # dt = self.clock.tick(self.framerate)
+            dt = self.clock.tick_busy_loop(self.framerate)
 
 
 def main():
@@ -178,5 +178,4 @@ def main():
     game.gameloop()
 
 if __name__ == "__main__":
-    game = Game()
-    game.gameloop()
+    main()
