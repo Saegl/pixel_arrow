@@ -1,9 +1,11 @@
 import subprocess
 from time import sleep
 
+from pixel_arrow import config
+
 # subprocess.Popen(['python', '-m', 'pip', 'install', 'pygame'])
 
-number_of_clients = 1
+number_of_clients = config.number_of_players
 
 server = subprocess.Popen(['python', 'run_udpserver.py'])
 print("Waiting server to start, don't close")

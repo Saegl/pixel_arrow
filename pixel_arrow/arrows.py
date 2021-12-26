@@ -86,7 +86,7 @@ class Arrows(DrawMixin, UpdateMixin):
             if arrow.state == ArrowState.fly:
                 dx = -ARROW_SPEED if arrow.left else ARROW_SPEED
                 arrow.pos.x += dx
-                for opponent in self.game.opponents:
+                for opponent in self.game.multiplayer.opponents:
                     if arrow.collide_player(opponent):
                         arrow.damage(opponent)
                 if arrow.collide_player(player):

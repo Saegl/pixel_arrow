@@ -58,7 +58,7 @@ class ImageStore:
         self.__dict__[name] = value
 
     @staticmethod
-    def load_images(screen_size):
+    def load_images(screen_size) -> 'ImageStore':
         background_image = fast_load("images/Backgrounds/merged-full-background.png")
         background_image = pygame.transform.scale(background_image, screen_size)
 
@@ -93,5 +93,11 @@ class ImageStore:
         )
 
         store.heart = heart
+
+        popup = fast_load_alpha('images/UI/UI-Menu-Popup-Background.png')
+        store.popup = scale_nx(popup, 5)
+
+        button_default = fast_load_alpha('images/UI/UI-Menu-Button-Default.png')
+        store.button_default = scale_nx(button_default, 5)
 
         return store

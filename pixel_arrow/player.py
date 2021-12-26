@@ -1,7 +1,9 @@
+from collections import defaultdict
 from dataclasses import dataclass
 
 import pygame
 from pygame import Surface
+from pygame.locals import *
 
 from pixel_arrow.image_store import ImageStore
 from pixel_arrow.vector import Vector2D
@@ -18,22 +20,57 @@ class PlayerState:
     attack = 3
 
 
+@dataclass
+class PlayerKeys:
+    attacking: bool = False
+    moving_right: bool = False
+    moving_left: bool = False
+    moving_down: bool = False
+    moving_up: bool = False
+
+    @staticmethod
+    def from_pressed(pressed: defaultdict[int, bool]) -> 'PlayerKeys':
+        pk = PlayerKeys()
+        if pressed[K_a]: pk.attacking = True
+        if pressed[K_RIGHT]: pk.moving_right = True
+        if pressed[K_LEFT]: pk.moving_left = True
+        if pressed[K_DOWN]: pk.moving_down = True
+        if pressed[K_UP]: pk.moving_up = True
+        return pk
+    
+    @staticmethod
+    def from_list(arr: list[bool]) -> 'PlayerKeys':
+        pk = PlayerKeys()
+        if arr[0]: pk.attacking = True
+        if arr[1]: pk.moving_right = True
+        if arr[2]: pk.moving_left = True
+        if arr[3]: pk.moving_down = True
+        if arr[4]: pk.moving_up = True
+        return pk
+
+    def as_list(self) -> list[bool]:
+        arr = [False] * 5
+        if self.attacking: arr[0] = True
+        if self.moving_right: arr[1] = True
+        if self.moving_left: arr[2] = True
+        if self.moving_down: arr[3] = True
+        if self.moving_up: arr[4] = True
+        return arr
+
 class Player(DrawMixin, UpdateMixin):
     def __init__(
-        self, location: Vector2D, show_hp: bool, image_store: ImageStore, screen: Surface, map_: Map, game
+        self,
+        location: Vector2D,
+        show_hp: bool,
+        image_store: ImageStore,
+        screen: Surface,
+        game,
     ) -> None:
         self.setup_draw(image_store, screen)
         self.setup_update(game)
 
-        self.map = map_
-
-        self.attacking = False
         self.arrow_fired = False
-        self.moving_right = False
-        self.moving_left = False
-        self.moving_down = False
-        self.moving_up = False
-
+        self.attacking = False
         self.look_left = False
 
         self.hp = 5
@@ -61,16 +98,19 @@ class Player(DrawMixin, UpdateMixin):
             for i in range(self.hp):
                 screen.blit(self.image_store.heart, (33.0 + offset * i, 10.0))
 
-    def update(self):
+    # TODO Liskov substitution violation
+    def update(self, keys: PlayerKeys):
         self.frames += 1
+        if keys.attacking:
+            self.attacking = True
 
         ## Movement by arrow keys
         player_movement = Vector2D(0.0, 0.0)
-        if self.moving_right:
+        if keys.moving_right:
             player_movement.x += 5
-        if self.moving_left:
+        if keys.moving_left:
             player_movement.x -= 5
-        if self.moving_up and self.on_ground():  # Jump
+        if keys.moving_up and self.on_ground():  # Jump
             self.y_momentum -= 7.5
 
         ## Collisions
@@ -90,7 +130,7 @@ class Player(DrawMixin, UpdateMixin):
         if self.attacking:
             self.state = PlayerState.attack
         elif self.on_ground():
-            if not self.moving():
+            if not self.moving(keys):
                 self.state = PlayerState.idle
             else:
                 self.state = PlayerState.run
@@ -98,9 +138,9 @@ class Player(DrawMixin, UpdateMixin):
             self.state = PlayerState.jump
 
         ## Side to look
-        if self.moving_right:
+        if keys.moving_right:
             self.look_left = False
-        elif self.moving_left:
+        elif keys.moving_left:
             self.look_left = True
 
     @property
@@ -156,10 +196,10 @@ class Player(DrawMixin, UpdateMixin):
     @property
     def grid_loc(self):
         rect = self.rect
-        return self.map.grid_loc(Vector2D(rect.centerx, rect.centery))
+        return self.game.map.grid_loc(Vector2D(rect.centerx, rect.centery))
 
     def collide(self) -> bool:
-        map_ = self.map
+        map_ = self.game.map
         loc = self.grid_loc
         tiles_loc = [
             Vector2D(loc.x + 1, loc.y + 1),  # bottom right
@@ -193,9 +233,9 @@ class Player(DrawMixin, UpdateMixin):
     def on_ground(self) -> bool:
         return self.collide_y(0.1)
 
-    def moving(self) -> bool:
+    def moving(self, keys: PlayerKeys) -> bool:
         return any(
-            [self.moving_right, self.moving_left, self.moving_up, self.moving_down]
+            [keys.moving_right, keys.moving_left, keys.moving_up, keys.moving_down]
         )
 
     def launch_an_arrow(self):

@@ -1,3 +1,3 @@
-from pixel_arrow import main
+from pixel_arrow import game
 
-main.main()
+game.main()

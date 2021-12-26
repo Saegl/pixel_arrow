@@ -1,30 +1,50 @@
 import socket
+from dataclasses import dataclass
 from pickle import dumps, loads
 
+from pixel_arrow import config
 
-buffer_size = 38
+
+@dataclass
+class SpawnResponse:
+    player: tuple[float]
+    opponents: list[tuple[float]]
+
 
 class Client:
     def __init__(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.host = "192.168.0.103"
-        self.port = 5555
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.host = config.host
+        self.port = config.port
         self.addr = (self.host, self.port)
+        self.buffer_size = config.buffer_size
         self.cliend_id = self.get_player_id()
+        print(self.cliend_id)
+
+    def sendto_server(self, data):
+        self.sock.sendto(dumps(data), self.addr)
+
+    def recvfrom_server(self):
+        data = self.sock.recv(self.buffer_size)
+        return loads(data)
 
     def get_player_id(self):
         sended_message = 0
-        self.client.sendto(dumps(sended_message), self.addr)
-        data, addr = self.client.recvfrom(buffer_size)
-        return loads(data)
-    
-    def wait_for_players(self):
-        data, addr = self.client.recvfrom(buffer_size)
-        return loads(data)
-    
-    def winner(self):
-        self.client.sendto(dumps(-1), self.addr)
+        self.sendto_server(sended_message)
+        return self.recvfrom_server()
 
-    def send(self, data):
-        self.client.sendto(dumps([self.cliend_id] + data), self.addr)
-        return loads(self.client.recv(buffer_size))
+    def wait_for_players(self) -> SpawnResponse:
+        spawners_data = self.recvfrom_server()
+        player_spawn = spawners_data[self.cliend_id]
+        opponents_spawn = (
+            spawners_data[: self.cliend_id]
+            + spawners_data[self.cliend_id + 1 :]
+        )
+        return SpawnResponse(player_spawn, opponents_spawn)
+
+    def winner(self):
+        self.sendto_server(-1)
+
+    def send_keys(self, data):
+        self.sendto_server([self.cliend_id] + data)
+        return self.recvfrom_server()
