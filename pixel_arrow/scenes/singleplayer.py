@@ -47,7 +47,7 @@ class SingleplayerScene(Scene):
         self.add_system(BackgroundRenderer(images.background))
 
         ### On World Render
-        self.add_system(CharacterCameraClipping())
+        self.add_system(CharacterCameraClipping(self.player))
         self.add_system(WorldCameraClear())
         self.add_system(MapRenderer())
         self.add_system(AnimationRenderer())

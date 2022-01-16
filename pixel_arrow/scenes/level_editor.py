@@ -14,7 +14,6 @@ from pixel_arrow.components.collision import Collision
 
 from pixel_arrow.systems.usercontrol import UserControl
 from pixel_arrow.systems.worldrender import (
-    CharacterCameraClipping,
     MapRenderer,
     MouseCameraClipping,
     WorldCameraRender,

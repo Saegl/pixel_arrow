@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pygame as pg
 from pixel_arrow.components.position import Position
-from flecs import Scene, System
+from flecs import Scene, System, Entity
 from pixel_arrow.components.world import Tiles, World
 
 
@@ -44,10 +44,12 @@ CHARACTER_CAMERA_LAG = 20
 
 @dataclass
 class CharacterCameraClipping(System):
+    def __init__(self, character_entity: Entity):
+        self.character_entity = character_entity
+
     def process(self, _, scene: Scene):
         world: World = scene.get_component(World)
-        # TODO get component by eid method
-        player_pos: Position = scene.entities[1][Position]
+        player_pos = self.character_entity.get_component(Position)
         screen = scene.game.screen
 
         new_clipping_rect = screen.get_rect()

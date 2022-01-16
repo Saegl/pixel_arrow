@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import cache
 
 import pygame as pg
-from flecs import Component, Scene
+from flecs import Component, Scene, Entity
 from flecs.image_store import ImageStore, scale_nx, spritesheet, hflips
 
 from pixel_arrow.components.world import Tiles
@@ -38,11 +38,11 @@ def load_character_animations(images: ImageStore) -> list[AnimationState]:
     return character_animations
 
 
-def create_player(scene: Scene, tiles: Tiles) -> int:
+def create_player(scene: Scene, tiles: Tiles) -> Entity:
     character_animations = load_character_animations(scene.game.res.images)
     col_x_offset = 10.0
     col_y_offset = 10.0
-    player_id = scene.create_enitity(
+    return scene.create_enitity(
         Position(pg.math.Vector2(50.0, 500.0)),
         CharacterState(),
         CharacterMovement(),
@@ -54,7 +54,6 @@ def create_player(scene: Scene, tiles: Tiles) -> int:
             offset=pg.math.Vector2(col_x_offset, col_y_offset),
         ),
     )
-    return player_id
 
 
 @dataclass

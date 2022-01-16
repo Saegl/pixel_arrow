@@ -11,5 +11,4 @@ from flecs.scene import Scene
 from flecs.component import Component
 from flecs.framework import GameFramework
 from flecs.config import Config
-
-__all__ = [System, Scene, GameFramework, Component, Config]
+from flecs.entity import Entity

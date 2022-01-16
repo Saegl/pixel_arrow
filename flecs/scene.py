@@ -1,12 +1,14 @@
 import importlib
 import sys
-from typing import TYPE_CHECKING, Type, Any
+from typing import TYPE_CHECKING, Type
 from collections import defaultdict
 from functools import reduce
 
 import pygame as pg
 
 from flecs.filewatcher import FileWatcher
+
+from flecs.entity import Entity
 
 if TYPE_CHECKING:
     from flecs.framework import GameFramework
@@ -17,47 +19,41 @@ if TYPE_CHECKING:
 class Scene:
     def __init__(self, game: "GameFramework") -> None:
         self.game = game
-        self.entities: defaultdict[int, dict[Any, Any]] = defaultdict(dict)
-        self.components: defaultdict[Type["Component"], set[int]] = defaultdict(set)
-        self.systems: list["System"] = []
-        self._last_entity_id = -1
+        self.entities: defaultdict[Entity] = defaultdict(dict)
+        self.components: defaultdict[Type["Component"], set[Entity]] = defaultdict(set)
+        self.systems: list['System'] = []
 
+        # TODO: move to GameFramework
         self.systems_watcher = FileWatcher("pixel_arrow/systems")
 
-    def create_enitity(self, *components) -> int:
-        self._last_entity_id += 1
-        entity_id = self._last_entity_id
+    def create_enitity(self, *components: tuple['Component']) -> Entity:
+        entity = Entity()
+        for cmp in components:
+            entity.add_component(cmp)
+            self.components[type(cmp)].add(entity)
+        return entity
 
-        for component in components:
-            self.components[type(component)].add(entity_id)
-            self.entities[entity_id][type(component)] = component
+    def remove_entity(self, entity: Entity) -> None:
+        for component_type in self.entities[entity]:
+            self.components[component_type].remove(entity)
+        del self.entities[entity]
 
-        return entity_id
-
-    def remove_entity(self, entity_id: int):
-        for component_type in self.entities[entity_id]:
-            self.components[component_type].remove(entity_id)
-        del self.entities[entity_id]
-
-    def get_entities(self, *query):
-        components = [self.components[q] for q in query]
-        if len(components) == 0:
-            yield None
-        eids = reduce(set.intersection, components)
-        for eid in eids:
-            components = []
+    def get_entities(self, *query: tuple[Type['Component']]):
+        entities_by_component = [self.components[q] for q in query]
+        entities = reduce(set.intersection, entities_by_component)
+        for entity in entities:
+            returned_components = []
             for component_type in query:
-                components.append(self.entities[eid][component_type])
-            yield eid, components
+                returned_components.append(entity.get_component(component_type))
+            yield entity, returned_components
 
     def get_component(self, component_type: Type["Component"]) -> "Component":
         if len(self.components[component_type]) != 1:
             raise ValueError("Cannot get one component, collection len is not 1")
 
-        eid = -1
-        for c in self.components[component_type]:
-            eid = c
-        return self.entities[eid][component_type]
+        for entity in self.components[component_type]:
+            return entity.get_component(component_type)
+        raise ValueError("Unreachable code")
 
     def add_system(self, system):
         system.scene = self
@@ -93,6 +89,7 @@ class Scene:
         pass
 
     def on_mouse_button_up(self, e: pg.event.Event):
+        # TODO better event handling, maybe use a dict of callbacks
         for system in self.systems:
             system.on_mouse_button_up(e)
 

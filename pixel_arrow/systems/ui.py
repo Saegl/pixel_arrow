@@ -6,6 +6,14 @@ from pixel_arrow.scenes.singleplayer import SingleplayerScene
 
 
 @dataclass
+class Button:
+    clickable_area: pg.Rect
+    text: str
+    default_image: pg.Surface
+    hover_image: pg.Surface
+
+
+@dataclass
 class MenuPopup(System):
     def __init__(self, scene: Scene) -> None:
         images = scene.game.res.images
