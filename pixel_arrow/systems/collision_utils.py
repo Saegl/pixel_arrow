@@ -19,16 +19,16 @@ def collide_with(collider: pg.Rect, collisions: list[pg.Rect]) -> bool:
     return any([collider.colliderect(x) for x in collisions])
 
 
-def cell_to_rect(x, y, tile_size):
+def cell_to_rect(x, y, tile_size) -> pg.Rect:
     return pg.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
 
 
-def grid_loc_point(point: pg.math.Vector2) -> pg.math.Vector2:
-    return pg.math.Vector2(point.x // 48, point.y // 48)
+def grid_loc_point(point_x: int, point_y: int) -> tuple[int, int]:
+    return point_x // 48, point_y // 48
 
 
-def grid_loc_box(rect: pg.Rect) -> pg.math.Vector2:
-    return grid_loc_point(pg.math.Vector2(rect.centerx, rect.centery))
+def grid_loc_box(rect: pg.Rect) -> tuple[int, int]:
+    return grid_loc_point(rect.centerx, rect.centery)
 
 
 def collide(collision: Collision, dv: pg.math.Vector2) -> bool:
@@ -37,21 +37,20 @@ def collide(collision: Collision, dv: pg.math.Vector2) -> bool:
     loc = grid_loc_box(collision.box)
 
     tiles_loc = [
-        pg.math.Vector2(loc.x + 1, loc.y + 1),  # bottom right
-        pg.math.Vector2(loc.x + 0, loc.y + 1),  # bottom
-        pg.math.Vector2(loc.x - 1, loc.y + 1),  # bottom left
-        pg.math.Vector2(loc.x + 1, loc.y - 1),  # top right
-        pg.math.Vector2(loc.x + 0, loc.y - 1),  # top
-        pg.math.Vector2(loc.x - 1, loc.y - 1),  # top left
-        pg.math.Vector2(loc.x + 1, loc.y),  # right
-        pg.math.Vector2(loc.x - 1, loc.y),  # left
+        (loc[0] + 1, loc[1] + 1),  # bottom right
+        (loc[0] + 0, loc[1] + 1),  # bottom
+        (loc[0] - 1, loc[1] + 1),  # bottom left
+        (loc[0] + 1, loc[1] - 1),  # top right
+        (loc[0] + 0, loc[1] - 1),  # top
+        (loc[0] - 1, loc[1] - 1),  # top left
+        (loc[0] + 1, loc[1]),  # right
+        (loc[0] - 1, loc[1]),  # left
     ]
 
-    # TODO remove Vector2
     collisions = filter(
-        lambda loc: collision.tiles[int(loc.x)][int(loc.y)] != "0", tiles_loc
+        lambda loc: collision.tiles[loc[0]][loc[1]] != "0", tiles_loc
     )
-    collisions = map(lambda loc: cell_to_rect(loc.x, loc.y, 48), collisions)
+    collisions = map(lambda loc: cell_to_rect(loc[0], loc[1], 48), collisions)
 
     ans = collide_with(collision.box, list(collisions))
 

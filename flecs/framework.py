@@ -1,5 +1,5 @@
 import sys
-from typing import Any
+from typing import Any, Sequence
 import pygame as pg
 from collections import defaultdict
 from flecs.resources import Resources
@@ -20,11 +20,13 @@ class GameFramework:
         else:
             self.display = pg.display.set_mode(config.window_size, config.flags)
         self.screen = pg.Surface(config.screen_size)
+        # TODO move debug screen and related stuff to new class
         self.debug_screen = pg.Surface(config.screen_size, pg.SRCALPHA)
         self.debug_info: dict[str, Any] = {}
         self.debug_info["FPS"] = 0
-        self.is_fullscreen = config.fullscreen
         self.show_debug = False
+
+        self.is_fullscreen = config.fullscreen
 
         self.screen_scale = 1
         self.screen_x_offset = 0
@@ -35,7 +37,7 @@ class GameFramework:
         else:
             self.sync_fps = self.clock.tick
         self.display_update = pg.display.update
-        self.pressed_keys = defaultdict(bool)  ## TODO USE PYGAME PRESSED
+        self.pressed_keys: Sequence[bool] = pg.key.get_pressed()
         self.res = Resources.loader(config)
         self.event_handlers = {
             pg.QUIT: self.on_quit,
@@ -47,6 +49,7 @@ class GameFramework:
         self.active_scene = None
 
     def push(self, scene: "Scene"):
+        # TODO Create Navigator class
         self.scenes.append(scene)
         self.active_scene = scene
         self.debug_info["active scene"] = type(self.active_scene).__name__
@@ -81,6 +84,7 @@ class GameFramework:
 
     def process(self, dt):
         self.debug_screen.fill((0, 0, 0, 0))
+        self.pressed_keys = pg.key.get_pressed()
         self.active_scene.process(dt)
         screen_size = self.screen.get_size()
         display_size = self.display.get_size()
@@ -117,11 +121,9 @@ class GameFramework:
             self.is_fullscreen = not self.is_fullscreen
         if event.key == pg.K_F1:
             self.show_debug = not self.show_debug
-        self.pressed_keys[event.key] = True
         self.active_scene.on_keydown(event)
 
     def on_keyup(self, event: pg.event.Event):
-        self.pressed_keys[event.key] = False
         self.active_scene.on_keyup(event)
 
     def on_mouse_button_up(self, event: pg.event.Event):
