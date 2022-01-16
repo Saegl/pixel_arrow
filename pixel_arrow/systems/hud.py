@@ -46,9 +46,9 @@ class TilesetRenderer(System):
         screen = scene.game.screen
         images = scene.game.res.images
 
-        scene.game.debug_info["sliding"] = self.sliding
-        scene.game.debug_info["sliding_up"] = self.sliding_up
-        scene.game.debug_info["y_offset"] = self.y_offset
+        scene.game.debug.info["sliding"] = self.sliding
+        scene.game.debug.info["sliding_up"] = self.sliding_up
+        scene.game.debug.info["y_offset"] = self.y_offset
 
         if self.sliding and self.sliding_up and self.y_offset < 700:
             self.y_offset += 50
@@ -60,8 +60,8 @@ class TilesetRenderer(System):
 
         screen.blit(images.tiles_list, (0, self.y_offset))
 
-        pg.draw.rect(scene.game.debug_screen, (255, 0, 0, 100), self.open_rect)
-        pg.draw.rect(scene.game.debug_screen, (255, 0, 0, 100), self.close_rect)
+        pg.draw.rect(scene.game.debug.screen, (255, 0, 0, 100), self.open_rect)
+        pg.draw.rect(scene.game.debug.screen, (255, 0, 0, 100), self.close_rect)
 
         tile = iter(images.tiles.values())
 

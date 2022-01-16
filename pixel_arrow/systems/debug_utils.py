@@ -15,20 +15,20 @@ class MouseClicks(System):
         self.rects.append(pg.Rect(pos[0], pos[1], 100, 100))
 
     def process(self, dt, scene: Scene):
-        scene.game.debug_info["mouse clicks"] = "active"
+        scene.game.debug.info["mouse clicks"] = "active"
 
         for rect in self.rects:
-            pg.draw.rect(scene.game.debug_screen, (255, 0, 0), rect)
+            pg.draw.rect(scene.game.debug.screen, (255, 0, 0), rect)
 
         pg.draw.rect(
-            scene.game.debug_screen,
+            scene.game.debug.screen,
             (0, 200, 0),
             pg.Rect(scene.game.screen_x_offset, scene.game.screen_y_offset, 10, 10),
         )
 
         mouse_pos = scene.game.get_mouse_pos()
         pg.draw.rect(
-            scene.game.debug_screen,
+            scene.game.debug.screen,
             (0, 200, 0),
             pg.Rect(mouse_pos[0], mouse_pos[1], 10, 10),
         )
@@ -37,11 +37,11 @@ class MouseClicks(System):
 @dataclass
 class CollisionsDebugRenderer(System):
     def process(self, _, scene: Scene):
-        scene.game.debug_info["collisions debug"] = "active"
+        scene.game.debug.info["collisions debug"] = "active"
         for _, (colls,) in scene.get_entities(Collision):
             colls: Collision
             pg.draw.rect(
-                scene.game.debug_screen,
+                scene.game.debug.screen,
                 (200, 0, 0, 100),
                 colls.box,
             )

@@ -4,7 +4,7 @@ from flecs.scene import Scene
 from flecs.framework import GameFramework
 
 from pixel_arrow.systems.background import BackgroundRenderer
-from pixel_arrow.systems.debug import MouseClicks
+from pixel_arrow.systems.debug_utils import MouseClicks
 from pixel_arrow.systems.ui import MenuPopup
 
 

@@ -1,10 +1,11 @@
 import sys
-from typing import Any, Sequence
+from typing import Sequence
 import pygame as pg
-from collections import defaultdict
+
 from flecs.resources import Resources
 from flecs.scene import Scene
 from flecs.config import Config
+from flecs.debug_screen import DebugScreen
 
 
 class GameFramework:
@@ -20,12 +21,6 @@ class GameFramework:
         else:
             self.display = pg.display.set_mode(config.window_size, config.flags)
         self.screen = pg.Surface(config.screen_size)
-        # TODO move debug screen and related stuff to new class
-        self.debug_screen = pg.Surface(config.screen_size, pg.SRCALPHA)
-        self.debug_info: dict[str, Any] = {}
-        self.debug_info["FPS"] = 0
-        self.show_debug = False
-
         self.is_fullscreen = config.fullscreen
 
         self.screen_scale = 1
@@ -47,19 +42,20 @@ class GameFramework:
         }
         self.scenes: list["Scene"] = []
         self.active_scene = None
+        self.debug = DebugScreen(config.screen_size, self.res.debug_font)
 
     def push(self, scene: "Scene"):
         # TODO Create Navigator class
         self.scenes.append(scene)
         self.active_scene = scene
-        self.debug_info["active scene"] = type(self.active_scene).__name__
+        self.debug.info["active scene"] = type(self.active_scene).__name__
 
     def pop(self):
         try:
             closed_scene = self.scenes.pop()
             closed_scene.destroy()
             self.active_scene = self.scenes[-1]
-            self.debug_info["active scene"] = type(self.active_scene).__name__
+            self.debug.info["active scene"] = type(self.active_scene).__name__
         except IndexError:
             pg.quit()
             sys.exit()
@@ -71,19 +67,8 @@ class GameFramework:
             1 / self.screen_scale * (mouse_pos[1] - self.screen_y_offset),
         )
 
-    def draw_debug_info(self):
-        debug_lines = []
-        for key, value in self.debug_info.items():
-            debug_lines.append(f"{key}: {value}")
-
-        for i, line in enumerate(debug_lines):
-            self.debug_screen.blit(
-                self.res.debug_font.render(line, True, (255, 255, 255)),
-                (10, 10 + i * 30),
-            )
-
     def process(self, dt):
-        self.debug_screen.fill((0, 0, 0, 0))
+        self.debug.screen.fill((0, 0, 0, 0))
         self.pressed_keys = pg.key.get_pressed()
         self.active_scene.process(dt)
         screen_size = self.screen.get_size()
@@ -103,9 +88,9 @@ class GameFramework:
 
         surf = pg.transform.scale(self.screen, screen_rect.size)
         self.display.blit(surf, (self.screen_x_offset, self.screen_y_offset))
-        if self.show_debug:
-            self.draw_debug_info()
-            debug_surf = pg.transform.scale(self.debug_screen, screen_rect.size)
+        if self.debug.show:
+            self.debug.update_screen()
+            debug_surf = pg.transform.scale(self.debug.screen, screen_rect.size)
             self.display.blit(debug_surf, (self.screen_x_offset, self.screen_y_offset))
 
     def on_keydown(self, event: pg.event.Event):
@@ -120,7 +105,7 @@ class GameFramework:
                 )
             self.is_fullscreen = not self.is_fullscreen
         if event.key == pg.K_F1:
-            self.show_debug = not self.show_debug
+            self.debug.show = not self.debug.show
         self.active_scene.on_keydown(event)
 
     def on_keyup(self, event: pg.event.Event):
@@ -142,13 +127,13 @@ class GameFramework:
         dt = 0
 
         while True:
-            self.debug_info["FPS"] = int(self.clock.get_fps())
+            self.debug.update_fps(self.clock)
             self.dispatch_events()
             self.process(dt)
             dt = self.sync_fps(self.config.framerate)
             self.display_update()
 
-    def on_quit(self, e: pg.event.Event = None):
+    def on_quit(self, _: pg.event.Event = None):
         """Pop and destory all scenes"""
         while True:
             self.pop()

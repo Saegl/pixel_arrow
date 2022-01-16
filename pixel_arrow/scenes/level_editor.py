@@ -3,7 +3,7 @@ import pygame as pg
 from flecs import Scene, GameFramework
 from pixel_arrow.systems.arrow_movement import ArrowMovement
 from pixel_arrow.systems.collision_utils import CollisionBoxUpdate
-from pixel_arrow.systems.debug import CollisionsDebugRenderer
+from pixel_arrow.systems.debug_utils import CollisionsDebugRenderer
 from pixel_arrow.systems.hud import HPRenderer, TilesetRenderer
 
 from pixel_arrow.components.world import Tiles, World
