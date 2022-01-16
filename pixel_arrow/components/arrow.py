@@ -1,30 +1,33 @@
 import pygame as pg
 from dataclasses import dataclass
+from functools import cache
 
 from flecs import Component, Scene
-from flecs.image_store import load_animation
+from flecs.image_store import ImageStore, scale_nx, spritesheet, hflips
 
 from pixel_arrow.components.position import Position
 from pixel_arrow.components.animation import Animation, AnimationState
 from pixel_arrow.components.collision import Collision
 
-arrow_animations = [
-    AnimationState(
-        *load_animation(
-            "pixel_arrow/res/images/Objects/Obj-Arrow-Idle-12x12.png", 36, 3
+
+@cache
+def load_arrow_animations(images: ImageStore) -> list[AnimationState]:
+    arrow_idle = spritesheet(scale_nx(images.arrow_idle12x12, 3), 36, 3)
+    arrow_stuck = spritesheet(scale_nx(images.arrow_stuck12x12, 3), 36, 9)
+    return [
+        AnimationState(
+            hflips(arrow_idle), arrow_idle,
+            cyclic=True
         ),
-        cyclic=True
-    ),
-    AnimationState(
-        *load_animation(
-            "pixel_arrow/res/images/Objects/Obj-Arrow-Stuck-12x12.png", 36, 9
+        AnimationState(
+            hflips(arrow_stuck), arrow_stuck,
+            cyclic=False
         ),
-        cyclic=False
-    ),
-]
+    ]
 
 
 def launch_arrow(scene: Scene, pos: pg.math.Vector2, left: bool):
+    arrow_animations = load_arrow_animations(scene.game.res.images)
     scene.create_enitity(
         Arrow(),
         Position(pos),

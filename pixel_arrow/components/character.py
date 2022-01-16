@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+from functools import cache
+
 import pygame as pg
 from flecs import Component, Scene
-from flecs.image_store import load_animation
+from flecs.image_store import ImageStore, scale_nx, spritesheet, hflips
 
 from pixel_arrow.components.world import Tiles
 from pixel_arrow.components.collision import Collision
@@ -9,27 +11,35 @@ from pixel_arrow.components.animation import AnimationState, Animation
 from pixel_arrow.components.position import Position
 
 
-character_animations = [
-    AnimationState(
-        *load_animation("pixel_arrow/res/images/Player/Player-Idle-24x24.png", 72, 3),
-        cyclic=True
-    ),
-    AnimationState(
-        *load_animation("pixel_arrow/res/images/Player/Player-Run-24x24.png", 72, 8),
-        cyclic=True
-    ),
-    AnimationState(
-        *load_animation("pixel_arrow/res/images/Player/Player-Jump-24x24.png", 72, 4),
-        cyclic=False
-    ),
-    AnimationState(
-        *load_animation("pixel_arrow/res/images/Player/Player-Attack-24x24.png", 72, 5),
-        cyclic=False
-    ),
-]
+@cache
+def load_character_animations(images: ImageStore) -> list[AnimationState]:
+    player_idle = spritesheet(scale_nx(images.player_idle24x24, 3), 72, 3)
+    player_run = spritesheet(scale_nx(images.player_run24x24, 3), 72, 8)
+    player_jump = spritesheet(scale_nx(images.player_jump24x24, 3), 72, 4)
+    player_attack = spritesheet(scale_nx(images.player_attack24x24, 3), 72, 5)
+    character_animations = [
+        AnimationState(
+            hflips(player_idle), player_idle,
+            cyclic=True
+        ),
+        AnimationState(
+            hflips(player_run), player_run,
+            cyclic=True
+        ),
+        AnimationState(
+            hflips(player_jump), player_jump,
+            cyclic=False
+        ),
+        AnimationState(
+            hflips(player_attack), player_attack,
+            cyclic=False
+        ),
+    ]
+    return character_animations
 
 
 def create_player(scene: Scene, tiles: Tiles) -> int:
+    character_animations = load_character_animations(scene.game.res.images)
     col_x_offset = 10.0
     col_y_offset = 10.0
     player_id = scene.create_enitity(

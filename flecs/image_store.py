@@ -34,23 +34,19 @@ def scale_nx(image: pg.Surface, n: int):
     return pg.transform.scale(image, (n * x, n * y))
 
 
-def load_animation(imagename, tile_size, count):
-    image = fast_load_alpha(imagename)
-    image = scale_nx(image, 3)
+def spritesheet(image: pg.Surface, tile_size: int, count: int):
+    width, height = image.get_size()
 
-    m, n = image.get_size()
-
-    images_right = []
-    for x in range(m // tile_size):
-        for y in range(n // tile_size):
-            images_right.append(
+    sprites = []
+    for x in range(width // tile_size):
+        for y in range(height // tile_size):
+            sprites.append(
                 image.subsurface(
                     pg.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
                 )
             )
-    images_right = images_right[:count]
-    images_left = hflips(images_right)
-    return [images_left, images_right]
+    sprites = sprites[:count]
+    return sprites
 
 
 class ImageStore:

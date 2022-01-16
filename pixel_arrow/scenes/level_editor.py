@@ -9,12 +9,7 @@ from pixel_arrow.systems.hud import HPRenderer, TilesetRenderer
 from pixel_arrow.components.world import Tiles, World
 from pixel_arrow.components.position import Position
 from pixel_arrow.components.animation import Animation
-from pixel_arrow.components.character import (
-    CharacterState,
-    UserControlled,
-    CharacterMovement,
-    character_animations,
-)
+from pixel_arrow.components.character import create_player
 from pixel_arrow.components.collision import Collision
 
 from pixel_arrow.systems.usercontrol import UserControl
@@ -41,20 +36,7 @@ class LevelEditorScene(Scene):
 
         self.create_enitity(self.tiles, World())
 
-        col_x_offset = 10.0
-        col_y_offset = 10.0
-        self.player = self.create_enitity(
-            Position(pg.math.Vector2(50.0, 500.0)),
-            CharacterState(),
-            CharacterMovement(),
-            UserControlled(),
-            Animation(character_animations),
-            Collision(
-                pg.Rect(0.0, 0.0, 72.0 - col_x_offset * 2, 72.0 - col_y_offset),
-                self.tiles.grid,
-                offset=pg.math.Vector2(col_x_offset, col_y_offset),
-            ),
-        )
+        self.player = create_player(self, self.tiles)
 
         ### Game mechanics
         # self.add_system(UserControl())
