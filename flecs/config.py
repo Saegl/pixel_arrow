@@ -14,8 +14,12 @@ class Config:
     use_busy_loop: bool  # More tick precise and more cpu usage
 
     images_folder: str
-    game_font_folder: str
+    game_font_folder: str ## TODO game_font_path
+    debug_font_size: int
+    
+    enable_hot_reload: bool
     systems_module_prefix: str
+
 
     @staticmethod
     def from_obj_attrs(obj: object) -> "Config":

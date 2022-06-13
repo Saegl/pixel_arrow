@@ -12,8 +12,8 @@ from pixel_arrow.components.collision import Collision
 
 @cache
 def load_arrow_animations(images: ImageStore) -> list[AnimationState]:
-    arrow_idle = spritesheet(scale_nx(images.arrow_idle12x12, 3), 36, 3)
-    arrow_stuck = spritesheet(scale_nx(images.arrow_stuck12x12, 3), 36, 9)
+    arrow_idle = spritesheet(scale_nx(images.arrow_idle12x12, 3), 36, 36, 3)
+    arrow_stuck = spritesheet(scale_nx(images.arrow_stuck12x12, 3), 36, 36, 9)
     return [
         AnimationState(
             hflips(arrow_idle), arrow_idle,

@@ -40,8 +40,10 @@ class CollisionsDebugRenderer(System):
         scene.game.debug.info["collisions debug"] = "active"
         for _, (colls,) in scene.get_entities(Collision):
             colls: Collision
+            print(colls.box)
             pg.draw.rect(
-                scene.game.debug.screen,
+                scene.game.screen,
+                # scene.game.debug.screen,
                 (200, 0, 0, 100),
                 colls.box,
             )

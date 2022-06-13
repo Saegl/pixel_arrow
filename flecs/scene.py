@@ -1,6 +1,6 @@
 import importlib
 import sys
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Type, TypeVar
 from collections import defaultdict
 from functools import reduce
 
@@ -16,15 +16,20 @@ if TYPE_CHECKING:
     from flecs.component import Component
 
 
+T = TypeVar('T')
+
 class Scene:
-    def __init__(self, game: "GameFramework") -> None:
+    def __init__(self, game: "GameFramework", name: str = 'Unnamed') -> None:
         self.game = game
         self.entities: defaultdict[Entity] = defaultdict(dict)
         self.components: defaultdict[Type["Component"], set[Entity]] = defaultdict(set)
         self.systems: list['System'] = []
 
         # TODO: move to GameFramework
-        self.systems_watcher = FileWatcher("pixel_arrow/systems")
+        if game.config.enable_hot_reload:
+            self.systems_watcher = FileWatcher("pixel_arrow/systems")
+        
+        self.game.event_handler.push_layer(fallback=True, name=name)
 
     def create_enitity(self, *components: tuple['Component']) -> Entity:
         entity = Entity()
@@ -47,7 +52,7 @@ class Scene:
                 returned_components.append(entity.get_component(component_type))
             yield entity, returned_components
 
-    def get_component(self, component_type: Type["Component"]) -> "Component":
+    def get_component(self, component_type: Type[T]) -> T:
         if len(self.components[component_type]) != 1:
             raise ValueError("Cannot get one component, collection len is not 1")
 
@@ -58,7 +63,25 @@ class Scene:
     def add_system(self, system):
         system.scene = self
         self.systems.append(system)
+
+        for event_name in self.game.event_handler.event_name_to_type:
+            if hasattr(system, event_name):
+                self.game.event_handler.add_handler_by_method(
+                    getattr(system, event_name)
+                )
     
+    def del_system(self, system):
+        system.scene = None
+        self.systems.remove(system)
+
+        # TODO remove handlers from event_handler
+    
+    def get_system(self, system_type: Type["System"]) -> "System":
+        for system in self.systems:
+            if isinstance(system, system_type):
+                return system
+        raise ValueError(f"System {system_type} not found")
+
     def systems_hot_reload(self):
         for updated_file in self.systems_watcher.get_updates():
             print("File changed", updated_file)
@@ -78,26 +101,14 @@ class Scene:
                     self.systems[i].scene = self
 
     def process(self, dt):
-        self.systems_hot_reload()
+        if self.game.config.enable_hot_reload:
+            self.systems_hot_reload()
         for system in self.systems:
             system.process(dt, self)
 
-    def on_keydown(self, _: pg.event.Event):
-        pass
-
-    def on_keyup(self, _: pg.event.Event):
-        pass
-
-    def on_mouse_button_up(self, e: pg.event.Event):
-        # TODO better event handling, maybe use a dict of callbacks
-        for system in self.systems:
-            system.on_mouse_button_up(e)
-
     def destroy(self):
         print(f"{type(self).__name__} destroyed")
-        self.systems_watcher.kill()
-
-    def on_quit(self, _: pg.event.Event):
-        self.destroy()
-        pg.quit()
-        sys.exit()
+        if self.game.config.enable_hot_reload:
+            self.systems_watcher.kill()
+        
+        self.game.event_handler.pop_layer()

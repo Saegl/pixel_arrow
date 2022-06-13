@@ -15,6 +15,6 @@ class Resources:
     def loader(config: Config) -> "Resources":
         return Resources(
             images=ImageStore.load_images(config),
-            debug_font=pg.font.SysFont("Arial", 26),
+            debug_font=pg.font.Font(config.game_font_folder, config.debug_font_size),
             font=pg.font.Font(config.game_font_folder, 42),
         )

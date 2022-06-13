@@ -34,15 +34,16 @@ def scale_nx(image: pg.Surface, n: int):
     return pg.transform.scale(image, (n * x, n * y))
 
 
-def spritesheet(image: pg.Surface, tile_size: int, count: int):
+def spritesheet(image: pg.Surface, tile_width: int, tile_height, count: int):
+    # TODO: tile height and width
     width, height = image.get_size()
 
     sprites = []
-    for x in range(width // tile_size):
-        for y in range(height // tile_size):
+    for y in range(height // tile_height):
+        for x in range(width // tile_width):
             sprites.append(
                 image.subsurface(
-                    pg.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
+                    pg.Rect(x * tile_width, y * tile_height, tile_width, tile_height)
                 )
             )
     sprites = sprites[:count]

@@ -28,8 +28,8 @@ class MapRenderer(System):
         tiles: Tiles = scene.get_component(Tiles)
 
         images = scene.game.res.images
-        for x in range(tiles.m):
-            for y in range(tiles.n):
+        for x in range(tiles.width):
+            for y in range(tiles.height):
                 tile_type = tiles.grid[x][y]
                 if tile_type != "0":
                     world.surf.blit(

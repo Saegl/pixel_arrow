@@ -14,8 +14,5 @@ class System:
 
     scene: Union["Scene", None] = None
 
-    def on_mouse_button_up(self, event: pg.event.Event):
-        pass
-
     def process(self, dt, scene: "Scene"):
         pass

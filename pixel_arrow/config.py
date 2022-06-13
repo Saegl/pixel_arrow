@@ -16,4 +16,6 @@ framerate = 60
 use_busy_loop = False  # More tick precise and more cpu usage
 images_folder = "pixel_arrow/res/images"
 game_font_folder = "pixel_arrow/res/fonts/monogram/ttf/monogram.ttf"
+
+enable_hot_reload = False
 systems_module_prefix = "pixel_arrow.systems."  # Need for hot reloading

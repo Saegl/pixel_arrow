@@ -13,10 +13,10 @@ from pixel_arrow.components.position import Position
 
 @cache
 def load_character_animations(images: ImageStore) -> list[AnimationState]:
-    player_idle = spritesheet(scale_nx(images.player_idle24x24, 3), 72, 3)
-    player_run = spritesheet(scale_nx(images.player_run24x24, 3), 72, 8)
-    player_jump = spritesheet(scale_nx(images.player_jump24x24, 3), 72, 4)
-    player_attack = spritesheet(scale_nx(images.player_attack24x24, 3), 72, 5)
+    player_idle = spritesheet(scale_nx(images.player_idle24x24, 3), 72, 72, 3)
+    player_run = spritesheet(scale_nx(images.player_run24x24, 3), 72, 72, 8)
+    player_jump = spritesheet(scale_nx(images.player_jump24x24, 3), 72, 72, 4)
+    player_attack = spritesheet(scale_nx(images.player_attack24x24, 3), 72, 72, 5)
     character_animations = [
         AnimationState(
             hflips(player_idle), player_idle,

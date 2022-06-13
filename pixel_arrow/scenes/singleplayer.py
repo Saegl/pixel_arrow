@@ -57,7 +57,7 @@ class SingleplayerScene(Scene):
         self.add_system(HPRenderer())
 
         ### Debug
-        # self.add_system(CollisionsDebugRenderer())
+        self.add_system(CollisionsDebugRenderer())
 
     def on_keydown(self, event: pg.event.Event):
         if event.key == pg.K_ESCAPE:

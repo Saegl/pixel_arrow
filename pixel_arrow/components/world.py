@@ -6,8 +6,8 @@ from pixel_arrow.config import screen_size
 
 @dataclass
 class Tiles(Component):
-    m: int
-    n: int
+    width: int
+    height: int
     grid: list[list[str]]
 
     @staticmethod
@@ -15,16 +15,16 @@ class Tiles(Component):
         tiles = Tiles(100, 100, [["0"] * 100 for _ in range(100)])
 
         with open(filename, "r", encoding="utf-8") as f:
-            m, n = map(int, f.readline().split())
+            width, height = map(int, f.readline().split())
 
-            for y in range(n):
+            for y in range(height):
                 line = f.readline()
-                for x in range(m):
+                for x in range(width):
                     cellval = line[x]
                     tiles.grid[x][y] = cellval
 
-            tiles.m = m
-            tiles.n = n
+            tiles.width = width
+            tiles.height = height
 
         return tiles
 

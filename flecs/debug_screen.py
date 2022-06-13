@@ -16,10 +16,13 @@ class DebugScreen:
         for key, value in self.info.items():
             debug_lines.append(f"{key}: {value}")
 
+        offset_x = 5.0
+        offset_y = 5.0
+        offset_y_between = self.font.get_height() + 3.0
         for i, line in enumerate(debug_lines):
             self.screen.blit(
-                self.font.render(line, True, (255, 255, 255)),
-                (10, 10 + i * 30),
+                self.font.render(line, False, (255, 255, 255)),
+                (offset_x, offset_y + i * offset_y_between),
             )
     
     def update_fps(self, clock: pg.time.Clock):
